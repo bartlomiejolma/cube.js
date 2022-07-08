@@ -233,8 +233,9 @@ export class Dbt extends AbstractExtension {
       if (!modelDef) {
         throw new UserError(`Model '${model}' is not found`);
       }
+      const modelObject = modelDef.alias ?? modelDef.name;
       const cubeDef = {
-        sql: () => `SELECT * FROM ${modelDef.relation_name ? modelDef.relation_name : `${this.compiler.contextQuery().escapeColumnName(modelDef.database)}.${this.compiler.contextQuery().escapeColumnName(modelDef.schema)}.${this.compiler.contextQuery().escapeColumnName(modelDef.name)}`}`,
+        sql: () => `SELECT * FROM ${modelDef.relation_name ? modelDef.relation_name : `${this.compiler.contextQuery().escapeColumnName(modelDef.database)}.${this.compiler.contextQuery().escapeColumnName(modelDef.schema)}.${this.compiler.contextQuery().escapeColumnName(modelObject)}`}`,
         fileName: manifestPath,
 
         measures: cubeDefs[model].metrics.map(metric => ({
