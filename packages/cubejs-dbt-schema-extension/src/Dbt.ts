@@ -11,8 +11,10 @@ type MetricDefinition = {
   model: string;
   // eslint-disable-next-line camelcase
   package_name: string;
-  type: string;
-  sql: string;
+  type?: string;
+  sql?: string;
+  calculation_method?: string;
+  expression?: string;
   dimensions?: string[];
   timestamp?: string;
 };
@@ -58,8 +60,10 @@ type GraphqlModel = {
 type GraphqlMetrics = {
   timestamp: string;
   dimensions: string[];
-  sql: string;
-  type: string;
+  sql?: string;
+  type?: string;
+  calculation_method?: string;
+  expression?: string;
   uniqueId: string;
   name: string;
   packageName: string;
@@ -95,6 +99,8 @@ query LoadModels($jobId: Int!) {
     description
     type
     sql
+    calculation_method
+    expression
     timestamp
     timeGrains
     dimensions
@@ -180,8 +186,8 @@ export class Dbt extends AbstractExtension {
           model: metricDef.model.uniqueId,
           // eslint-disable-next-line camelcase
           package_name: metricDef.packageName,
-          type: metricDef.type,
-          sql: metricDef.sql,
+          type: metricDef.type ?? metricDef.calculation_method,
+          sql: metricDef.sql ?? metricDef.expression,
           dimensions: metricDef.dimensions,
           timestamp: metricDef.timestamp,
         }
@@ -239,8 +245,8 @@ export class Dbt extends AbstractExtension {
 
         measures: cubeDefs[model].metrics.map(metric => ({
           [camelize(metric.name, true)]: {
-            sql: () => metric.sql,
-            type: mapMetricType(metric.type),
+            sql: () => metric.sql ?? metric.expression,
+            type: mapMetricType(metric.type ?? metric.calculation_method ?? ""),
           },
         })).reduce((a, b) => ({ ...a, ...b }), {}),
 
